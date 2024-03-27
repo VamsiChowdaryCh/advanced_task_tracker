@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Task Tracker</title>
+    <!-- Include CSS styles here -->
+    <link rel="stylesheet" href="styles.css">
+	<style>
+        /* Internal CSS styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        h1, h2 {
+            color: #333;
+            text-align: center;
+        }
+        form {
+            margin-bottom: 20px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="datetime-local"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        #taskStatus {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			border: 1px solid #ddd; /* Add border to the table */
+		}
+
+		th, td {
+			padding: 12px;
+			text-align: left;
+		}
+
+		thead {
+			background-color: #f2f2f2; /* Light gray background for table header */
+		}
+
+		tr:nth-child(even) {
+			background-color: #f9f9f9; /* Alternate row background color */
+		}
+
+		tr:hover {
+			background-color: #f2f2f2; /* Hover color for rows */
+		}
+    </style>
+</head>
+<body>
+    <h1>Advanced Task Tracker</h1>
+    
+    <h2>Category Management</h2>
+    <!-- Create Category Form -->
+    <form id="createCategoryForm">
+        <label for="categoryName">Category Name:</label>
+        <input type="text" id="categoryName" name="categoryName" required>
+        <button type="submit">Create Category</button>
+    </form>
+    
+    <!-- Update Category Form -->
+    <form id="updateCategoryForm">
+        <label for="oldCategoryName">Old Category Name:</label>
+        <input type="text" id="oldCategoryName" name="oldCategoryName" required>
+        <label for="newCategoryName">New Category Name:</label>
+        <input type="text" id="newCategoryName" name="newCategoryName" required>
+        <button type="submit">Update Category</button>
+    </form>
+    
+    <!-- Delete Category Form -->
+    <form id="deleteCategoryForm">
+        <label for="deleteCategoryName">Category Name to Delete:</label>
+        <input type="text" id="deleteCategoryName" name="deleteCategoryName" required>
+        <button type="submit">Delete Category</button>
+    </form>
+    
+    <h2>Task Management</h2>
+    <!-- Create Task Form -->
+    <form id="createTaskForm">
+        <label for="taskTitle">Task Title:</label>
+        <input type="text" id="taskTitle" name="taskTitle" required>
+        <label for="taskDescription">Task Description:</label>
+        <textarea id="taskDescription" name="taskDescription" required></textarea>
+        <label for="taskPriority">Priority:</label>
+        <select id="taskPriority" name="taskPriority">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+        </select>
+        <label for="taskReminder">Set Reminder:</label>
+        <input type="datetime-local" id="taskReminder" name="taskReminder">
+        <button type="submit">Create Task</button>
+    </form>
+    
+    <!-- Update Task Form -->
+    <form id="updateTaskForm">
+        <label for="updateTaskTitle">Task Title to Update:</label>
+        <input type="text" id="updateTaskTitle" name="updateTaskTitle" required>
+        <!-- Include fields for updating task details -->
+        <button type="submit">Update Task</button>
+    </form>
+    
+    <!-- Delete Task Form -->
+    <form id="deleteTaskForm">
+        <label for="deleteTaskTitle">Task Title to Delete:</label>
+        <input type="text" id="deleteTaskTitle" name="deleteTaskTitle" required>
+        <button type="submit">Delete Task</button>
+    </form>
+    
+   <h2>Task Status Monitoring</h2>
+    <!-- Table for Task Monitoring -->
+    <table id="taskTable" border="1">
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Task Title</th>
+                <th>Description</th>
+                <th>Priority</th>
+                <th>Reminder</th>
+            </tr>
+        </thead>
+        <tbody id="taskTableBody">
+            <!-- Task rows will be dynamically added here -->
+        </tbody>
+    </table>
+    
+    <h2>Task Priority Setting</h2>
+    <!-- Set task priority here -->
+    <form id="setTaskPriorityForm">
+        <label for="taskPriorityCategory">Select Category:</label>
+        <select id="taskPriorityCategory" name="taskPriorityCategory">
+            <!-- Populate with existing categories -->
+        </select>
+        <label for="taskPriorityTitle">Select Task:</label>
+        <select id="taskPriorityTitle" name="taskPriorityTitle">
+            <!-- Populate with tasks in selected category -->
+        </select>
+        <label for="taskPriorityLevel">Priority Level:</label>
+        <select id="taskPriorityLevel" name="taskPriorityLevel">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+        </select>
+        <button type="submit">Set Priority</button>
+    </form>
+    
+   
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sample data structures to store categories and tasks
+    let categories = [];
+    let tasks = {};
+
+    // Function to display categories in the priority setting form
+    function displayCategories() {
+        const selectCategory = document.getElementById('taskPriorityCategory');
+        selectCategory.innerHTML = ""; // Clear existing options
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            selectCategory.appendChild(option);
+        });
+    }
+
+    // Function to display tasks for a selected category in the priority setting form
+    function displayTasks(category) {
+        const selectTask = document.getElementById('taskPriorityTitle');
+        selectTask.innerHTML = ""; // Clear existing options
+        if (tasks[category]) {
+            tasks[category].forEach(task => {
+                const option = document.createElement('option');
+                option.value = task;
+                option.textContent = task;
+                selectTask.appendChild(option);
+            });
+        }
+    }
+
+    // Function to display tasks in the table
+    function displayTasksInTable() {
+        const tableBody = document.getElementById('taskTableBody');
+        tableBody.innerHTML = ""; // Clear existing rows
+
+        // Loop through categories and tasks to populate the table
+        categories.forEach(category => {
+            if (tasks[category]) {
+                tasks[category].forEach(taskTitle => {
+                    const taskDescription = "Description"; // You can replace this with the actual task description
+                    const taskPriority = "Priority"; // You can replace this with the actual task priority
+                    const taskReminder = "Reminder"; // You can replace this with the actual task reminder
+
+                    // Create a new row
+                    const row = tableBody.insertRow();
+                    // Insert cells
+                    const categoryCell = row.insertCell(0);
+                    const titleCell = row.insertCell(1);
+                    const descriptionCell = row.insertCell(2);
+                    const priorityCell = row.insertCell(3);
+                    const reminderCell = row.insertCell(4);
+                    // Fill cells with data
+                    categoryCell.textContent = category;
+                    titleCell.textContent = taskTitle;
+                    descriptionCell.textContent = taskDescription;
+                    priorityCell.textContent = taskPriority;
+                    reminderCell.textContent = taskReminder;
+                });
+            }
+        });
+    }
+
+    // Function to handle category creation form submission
+    document.getElementById('createCategoryForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const categoryName = document.getElementById('categoryName').value;
+        categories.push(categoryName);
+        displayCategories();
+        // Clear input field after submission
+        document.getElementById('categoryName').value = '';
+    });
+
+    // Function to handle category update form submission
+    document.getElementById('updateCategoryForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const oldCategoryName = document.getElementById('oldCategoryName').value;
+        const newCategoryName = document.getElementById('newCategoryName').value;
+        const index = categories.indexOf(oldCategoryName);
+        if (index !== -1) {
+            categories[index] = newCategoryName;
+            // Update tasks object keys if category name is changed
+            if (tasks[oldCategoryName]) {
+                tasks[newCategoryName] = tasks[oldCategoryName];
+                delete tasks[oldCategoryName];
+            }
+            displayCategories();
+        }
+        // Clear input fields after submission
+        document.getElementById('oldCategoryName').value = '';
+        document.getElementById('newCategoryName').value = '';
+    });
+
+    // Function to handle category deletion form submission
+    document.getElementById('deleteCategoryForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const deleteCategoryName = document.getElementById('deleteCategoryName').value;
+        const index = categories.indexOf(deleteCategoryName);
+        if (index !== -1) {
+            categories.splice(index, 1);
+            delete tasks[deleteCategoryName];
+            displayCategories();
+        }
+        // Clear input field after submission
+        document.getElementById('deleteCategoryName').value = '';
+    });
+
+    // Function to handle task creation form submission
+    document.getElementById('createTaskForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const taskTitle = document.getElementById('taskTitle').value;
+        const taskDescription = document.getElementById('taskDescription').value;
+        const taskPriority = document.getElementById('taskPriority').value;
+        const taskReminder = document.getElementById('taskReminder').value;
+        const selectedCategory = document.getElementById('taskPriorityCategory').value;
+
+        if (!tasks[selectedCategory]) {
+            tasks[selectedCategory] = [];
+        }
+        tasks[selectedCategory].push(taskTitle);
+
+        // Process the task creation here
+        console.log('Task Title:', taskTitle);
+        console.log('Task Description:', taskDescription);
+        console.log('Task Priority:', taskPriority);
+        console.log('Task Reminder:', taskReminder);
+        // Clear input fields after submission
+        document.getElementById('taskTitle').value = '';
+        document.getElementById('taskDescription').value = '';
+        document.getElementById('taskPriority').value = 'low'; // Reset priority to default
+        document.getElementById('taskReminder').value = '';
+
+        displayTasks(selectedCategory);
+        displayTasksInTable(); // Update the table after adding a new task
+    });
+
+    // Function to handle task update form submission
+    document.getElementById('updateTaskForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const updateTaskTitle = document.getElementById('updateTaskTitle').value;
+        // Add code to handle task update here
+        console.log('Task Title to Update:', updateTaskTitle);
+        // Clear input field after submission
+        document.getElementById('updateTaskTitle').value = '';
+    });
+
+    // Function to handle task deletion form submission
+    document.getElementById('deleteTaskForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const deleteTaskTitle = document.getElementById('deleteTaskTitle').value;
+        // Add code to handle task deletion here
+        console.log('Task Title to Delete:', deleteTaskTitle);
+        // Clear input field after submission
+        document.getElementById('deleteTaskTitle').value = '';
+    });
+
+    // Function to handle setting task priority form submission
+    document.getElementById('setTaskPriorityForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const taskPriorityCategory = document.getElementById('taskPriorityCategory').value;
+        const taskPriorityTitle = document.getElementById('taskPriorityTitle').value;
+        const taskPriorityLevel = document.getElementById('taskPriorityLevel').value;
+        // Add code to handle setting task priority here
+        console.log('Category:', taskPriorityCategory);
+        console.log('Task Title:', taskPriorityTitle);
+        console.log('Priority Level:', taskPriorityLevel);
+        // Clear input fields after submission
+        document.getElementById('taskPriorityCategory').value = '';
+        document.getElementById('taskPriorityTitle').value = '';
+        document.getElementById('taskPriorityLevel').value = 'low'; // Reset priority level to default
+    });
+
+    // Initialize category select options
+    displayCategories();
+
+    // Event listener for category change in priority setting form
+    document.getElementById('taskPriorityCategory').addEventListener('change', function() {
+        const selectedCategory = document.getElementById('taskPriorityCategory').value;
+        displayTasks(selectedCategory);
+    });
+
+    // Call the function to initially populate the table
+    displayTasksInTable();
+});
+
+</script>
+
+</body>
+</html>
